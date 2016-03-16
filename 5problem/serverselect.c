@@ -18,7 +18,7 @@
 #define shmsize 4
 
 int ofd;
-
+int fd2[3],fd1[3]; int nClient=0,val;
 char mbuf[1024];
 
 void handler()
@@ -57,9 +57,11 @@ int main(int argc, char const *argv[])
 	ffd=open("ssfifo", 0666);
 
 	printf("pipe and fifo are created\n");
-	struct pollfd fds[4];
-	fds[0].fd=pfd[0];
-	fds[1].fd=ffd;
+	fd_set readset;
+    int maxfd;
+	//struct pollfd fds[4];
+	fd1[0]=pfd[0];
+	fd1[1]=ffd;
 
 
 	mkfifo("out.dat",0666);
@@ -74,16 +76,11 @@ int main(int argc, char const *argv[])
 	{
 		printf("error in popen creation\n");
 	}
-	fds[2].fd=fileno(fp);
+	fd1[2]=fileno(fp);
 
-	fds[3].fd=0;
+	//fd1[3]=0;
 	printf("hii im before poll\n");
-	int i;
-
-	for (i = 0; i < 4; ++i)
-	{
-		fds[i].events=POLLIN;
-	}
+	int i,j;
 
 	printf("hii im after poll\n");
 
@@ -91,10 +88,9 @@ int main(int argc, char const *argv[])
 	printf("pid : %d\n",pid );
 	if(pid == 0)
 	{  
-		//char buf[128];
-		// for(i=0; i<1000; i++)
 		sleep(2);
 		{
+			close(pfd[0]);
 			printf("hii im child process\n");
 
 			char buf[128];
@@ -106,32 +102,48 @@ int main(int argc, char const *argv[])
 	}
 	else 
 	{
+		close(pfd[1]);
 		printf("hii im in main process\n");
 		int i=-1;
 		while(1)
 		{
+			FD_ZERO(&readset);
+		      maxfd=0;
+		     for (j=0; j<3; j++)
+		      {
+		           FD_SET(fd1[j], &readset);
+		           maxfd = (maxfd>fd1[j])?maxfd:fd1[j];
+		       }
+		    //   FD_CLR(fd1[2],&readset);
 			signal(SIGUSR1,handler);
 		//	for (;;);
 			
-			int ret=poll(fds, 4 , 500);
+			int ret=select(maxfd+1,&readset,NULL,NULL,NULL);
 			if(ret>0)
 			{
 				//printf("poll occured : ");
 				sleep(1);
-				for (i = 0; i < 4; ++i)
+				for (i = 0; i < 3; ++i)
 				{
-					if(fds[i].revents & POLLIN )
+					if(FD_ISSET(fd1[i], &readset))
 					{
 
-						printf("%d\n", i );
+						//printf("%d\n", i );
 						char buf[128];
-						memset(buf,128,'\0');
-						int size=read(fds[i].fd,buf,128);
-						if(size<0) printf("kuch bhiii\n");
-						printf("%s\n",buf );
+						 memset(buf,'\0',128);
+						int size=read(fd1[i],buf,128);
+						if(size<=0) ;
+						else 
+							{printf("%s\n",buf );
 						mainsave(buf);
+					}
 
 					}
+					// if (i==2)
+					// {
+					// 	//pclose(fp);
+					// 	FD_CLR(fd1[2],&readset);
+					// }
 				}
 			}
 		}

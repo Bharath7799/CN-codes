@@ -16,19 +16,19 @@ struct pollfd fdsf[MAX];
  int fd2[MAX]; int nClient=1;
 char buffer[128], tmp[128];
 
-void acceptReq(const char arg[]){
+void acceptReq(const char arg[])
+{
      printf("Got a req %s\n",arg);
      strcpy(tmp, arg);
      strcat(tmp, "r");
-     //mkfifo(tmp,0666);
      printf("%s\n",tmp );
      fd2[nClient] = open(tmp, O_WRONLY);
+     printf("%s%d\n",tmp,fd2[nClient] );
      if(fd2[nClient] == -1) eerror("WERROR!!!");
      
      strcpy(tmp, arg);
      strcat(tmp, "w");
      printf("%s\n",tmp );
-    // mkfifo(tmp,0666);
      fdsf[nClient].fd = open(tmp, O_RDONLY);
      fdsf[nClient].events = POLLIN;
      if(fdsf[nClient].fd == -1) eerror("RERROR!!!");
@@ -65,13 +65,13 @@ int main()
               printf("%s\n",buffer);
               if(i==0)
               {
-                char *str1;
-                char *str2;
-                str1=strtok(buffer," ");
-                str2=strtok(NULL," ");
-                printf("%s\n", str1 );
-                printf("%s\n", str2 );
-                  acceptReq(str1);
+                // char *str1;
+                // char *str2;
+                // str1=strtok(buffer," ");
+                // str2=strtok(NULL," ");
+                // printf("%s\n", str1 );
+                // printf("%s\n", str2 );
+                  acceptReq(buffer);
               }
               else
               {

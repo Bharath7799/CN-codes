@@ -52,21 +52,23 @@ int main(int argc,char *argv[])
 
      int pid;
      pid = fork();
-     if(pid >0) { // parent process
-         //close(fd_r);
-         while(1){
+     if(pid >0)
+      { 
+        while(1)
+        {
              memset(tmp, 128, '\0');
              scanf("%s", tmp);
              write(fd_w, tmp, strlen(tmp)+1);
          }
-     } else { // child process
-         //close(fd_w);
-         while(1){
+     } 
+     else
+      { 
+
+         while(1)
+         {
              memset(buf, 128, '\0');
              read(fd_r, buf, 128);
-
              printf("%s\n", buf);
-           //  sleep(2);
          }
      }
      return 0;

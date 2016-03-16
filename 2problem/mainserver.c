@@ -49,12 +49,12 @@ int main()
         if(fd3 == -1) eerror("sfifo error");
              int timeout_msecs = 500;
         printf("sfifo opened in read mode\n");
-
+        int se=0;
     while(1)
     {
     		printf("poll occured\n" );
      
-	  	read(fd3, buffer,128);
+    	  	read(fd3, buffer,128);
 	    	printf("%s\n",buffer);
 	    	
                 str1=strtok(buffer," ");
@@ -76,6 +76,9 @@ int main()
 	        	
 	        	dup2(fd[nClient-2], 1);
 	        	dup2(fd2[nClient-2], 0);
+                close(fd[nClient-2]);
+                close(fd2[nClient-2]);
+                //printf("working properly\n");
 	        		execlp(b,b,NULL);
 	        	printf("execlp error\n" );
         	}
